@@ -1,0 +1,34 @@
+<resources>
+    <string name="app_name">NotepadPlusPlus</string>
+    <string name="text_menu_all_notes">All Notes</string>
+    <string name="text_menu_archived_notes">Archived Notes</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="text_note_locked">Locked</string>
+    <string name="text_empty_notes">No Notes Available</string>
+    <string name="title_toolbar_menu_all_notes">Notes</string>
+    <string name="title_toolbar_menu_archived_notes">Archived</string>
+    <string name="hint_field_title_notes">Title</string>
+    <string name="text_switch_archive">Archieved</string>
+    <string name="text_switch_using_password">Protect</string>
+    <string name="text_menu_save">Save</string>
+    <string name="text_title_edit_note_form_activity">Edit Note</string>
+    <string name="text_title_insert_note_form_activity">New Note</string>
+    <string name="error_form_note_title_empty">Please enter the Title</string>
+    <string name="text_card_color">Card Color</string>
+    <string name="text_color_picker_title">Pick Card Color</string>
+    <string name="hint_field_body_notes">Notes</string>
+    <string name="text_menu_delete">Delete</string>
+    <string name="text_bottom_sheet_enter_password_title">Enter Password</string>
+    <string name="text_bottom_sheet_enter_password_desc">Enter app Password to open the note</string>
+    <string name="hint_field_password">Password</string>
+    <string name="text_confirm_password">Confirm</string>
+    <string name="error_password_empty">Please fill this field</string>
+    <string name="text_new_password_title">Enter New Password</string>
+    <string name="text_new_password_desc">Insert new password for note</string>
+    <string name="hint_field_confirmed_password">Confirmed Password</string>
+    <string name="text_password_doesnt_match">Password doesn\'t Match</string>
+    <string name="text_menu_change_password">Change Password</string>
+    <string name="text_wrong_password">Wrong password</string>
+    <string name="text_success_set_password">Password has been set</string>
+</resources>
