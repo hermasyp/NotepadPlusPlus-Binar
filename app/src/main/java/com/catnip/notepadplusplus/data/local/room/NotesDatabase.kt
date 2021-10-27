@@ -29,7 +29,8 @@ abstract class NotesDatabase : RoomDatabase(){
                     context.applicationContext,
                     NotesDatabase::class.java,
                     DB_NAME
-                ).build()
+                )
+                    .build()
                 INSTANCE = instance
                 // return instance
                 instance

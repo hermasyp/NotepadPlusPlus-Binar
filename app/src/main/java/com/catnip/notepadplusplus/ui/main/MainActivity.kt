@@ -12,6 +12,7 @@ import com.catnip.notepadplusplus.databinding.ActivityMainBinding
 import com.catnip.notepadplusplus.ui.changepassword.ChangePasswordBottomSheet
 import com.catnip.notepadplusplus.ui.enterpassword.EnterPasswordBottomSheet
 import com.catnip.notepadplusplus.ui.main.notelist.NoteListFragment
+import com.catnip.notepadplusplus.ui.noteform.NoteFormActivity
 
 class MainActivity :
     BaseActivity<ActivityMainBinding, MainActivityContract.Presenter>(ActivityMainBinding::inflate),
@@ -25,11 +26,12 @@ class MainActivity :
         private const val TAG_FRAGMENT_ARCHIVED_NOTES = "TAG_FRAGMENT_ARCHIVED_NOTES"
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
+
     override fun initView() {
         setupFragment()
+        getViewBinding().fab.setOnClickListener {
+            NoteFormActivity.startActivity(this,NoteFormActivity.FORM_MODE_INSERT)
+        }
     }
 
     override fun setupFragment() {

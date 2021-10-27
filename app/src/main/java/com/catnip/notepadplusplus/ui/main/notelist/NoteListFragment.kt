@@ -13,6 +13,7 @@ import com.catnip.notepadplusplus.data.model.Note
 import com.catnip.notepadplusplus.databinding.FragmentNoteListBinding
 import com.catnip.notepadplusplus.ui.enterpassword.EnterPasswordBottomSheet
 import com.catnip.notepadplusplus.ui.main.notelist.adapter.NoteListAdapter
+import com.catnip.notepadplusplus.ui.noteform.NoteFormActivity
 import com.catnip.notepadplusplus.utils.CommonFunction
 import com.catnip.notepadplusplus.utils.SpacesItemDecoration
 
@@ -89,8 +90,7 @@ class NoteListFragment(private val isArchiveOnly: Boolean = false) :
             if (note.isProtected == true) {
                 showDialogPassword(note)
             } else {
-                // TODO: 25/10/2021 navigate to form detail
-                Toast.makeText(context, "Navigate to form Detail", Toast.LENGTH_SHORT).show()
+                NoteFormActivity.startActivity(context, NoteFormActivity.FORM_MODE_EDIT, note)
             }
         }
         getViewBinding().rvNotes.apply {
@@ -112,13 +112,14 @@ class NoteListFragment(private val isArchiveOnly: Boolean = false) :
     }
 
     override fun showDialogPassword(note: Note) {
-        EnterPasswordBottomSheet{ isPasswordConfirmed ->
-            if(isPasswordConfirmed){
-                // TODO: 25/10/2021 Navigate to detail form
-                Toast.makeText(context, "Navigate to form Detail", Toast.LENGTH_SHORT).show()
-            }else{
-                Toast.makeText(context, getString(R.string.text_wrong_password), Toast.LENGTH_SHORT).show()
+        EnterPasswordBottomSheet { isPasswordConfirmed ->
+            if (isPasswordConfirmed) {
+                NoteFormActivity.startActivity(context, NoteFormActivity.FORM_MODE_EDIT, note)
+
+            } else {
+                Toast.makeText(context, getString(R.string.text_wrong_password), Toast.LENGTH_SHORT)
+                    .show()
             }
-        }.show(childFragmentManager,null)
+        }.show(childFragmentManager, null)
     }
 }
