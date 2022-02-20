@@ -92,6 +92,7 @@ class NoteListAdapter(private val itemClick: (Note) -> Unit) :
         RecyclerView.ViewHolder(binding.root) {
         fun bindView(item: Note) {
             with(item) {
+                binding.tvTitleNote.text = item.title
                 binding.root.background = GradientDrawable().apply {
                     shape = GradientDrawable.RECTANGLE
                     cornerRadius = CommonFunction.dpToPixels(binding.root.context, 8).toFloat()

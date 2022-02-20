@@ -3,17 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:padding="16dp">
 
     <TextView
-        android:id="@+id/tv_locked"
-        style="@style/TextAppearance.MaterialComponents.Headline5"
+        android:id="@+id/tv_title_note"
+        style="@style/TextAppearance.MaterialComponents.Headline6"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/text_note_locked"
-        android:textAlignment="center"
-        android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:maxLines="1"
+        android:ellipsize="end"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Hello this is a Title" />
 
     <ImageView
         android:id="@+id/iv_locked"
@@ -23,6 +24,6 @@
         android:layout_marginTop="8dp"
         android:src="@drawable/ic_locked"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_locked" />
+        app:layout_constraintTop_toBottomOf="@id/tv_title_note" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

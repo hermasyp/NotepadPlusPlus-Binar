@@ -12,7 +12,7 @@ Written with love by Muhammad Hermas Yuda Pamungkas
 Github : https://github.com/hermasyp
  **/
 
-@Database(entities = [Note::class],version = 1)
+@Database(entities = [Note::class],version = 1, exportSchema = true)
 abstract class NotesDatabase : RoomDatabase(){
     abstract fun noteDao() : NotesDao
 
@@ -29,8 +29,7 @@ abstract class NotesDatabase : RoomDatabase(){
                     context.applicationContext,
                     NotesDatabase::class.java,
                     DB_NAME
-                )
-                    .build()
+                ).build()
                 INSTANCE = instance
                 // return instance
                 instance

@@ -7,7 +7,9 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import com.catnip.notepadplusplus.R
-import com.catnip.notepadplusplus.base.BaseActivity
+import com.catnip.notepadplusplus.base.model.Resource
+import com.catnip.notepadplusplus.base.arch.BaseActivity
+import com.catnip.notepadplusplus.base.arch.GenericViewModelFactory
 import com.catnip.notepadplusplus.data.local.preference.UserPreference
 import com.catnip.notepadplusplus.data.local.room.NotesDatabase
 import com.catnip.notepadplusplus.data.local.room.datasource.NotesDataSourceImpl
@@ -18,7 +20,7 @@ import com.github.dhaval2404.colorpicker.model.ColorShape
 import com.github.dhaval2404.colorpicker.model.ColorSwatch
 
 class NoteFormActivity :
-    BaseActivity<ActivityNoteFormBinding, NoteFormContract.Presenter>(ActivityNoteFormBinding::inflate),
+    BaseActivity<ActivityNoteFormBinding, NoteFormViewModel>(ActivityNoteFormBinding::inflate),
     NoteFormContract.View {
 
     private var formMode = FORM_MODE_INSERT
@@ -33,11 +35,6 @@ class NoteFormActivity :
         setClickListeners()
     }
 
-    override fun initPresenter() {
-        val dataSource = NotesDataSourceImpl(NotesDatabase.getInstance(this).noteDao())
-        val repository = NoteFormRepository(dataSource, UserPreference(this))
-        setPresenter(NoteFormPresenter(this, repository))
-    }
 
     private fun getIntentData() {
         formMode = intent.getIntExtra(INTENT_FORM_MODE, FORM_MODE_INSERT)
@@ -65,6 +62,38 @@ class NoteFormActivity :
 
     override fun setPasswordToggleEnabled(isEnabled: Boolean) {
         getViewBinding().swProtectNote.isEnabled = isEnabled
+    }
+
+    override fun observeData() {
+        getViewModel().getResultNoteLiveData().observe(this) {
+            when (it.first) {
+                NoteFormViewModel.INSERT_OPERATION -> {
+                    if (it.second is Resource.Success) {
+                        onInsertSuccess(it.second.data ?: 0)
+                    }
+                    else{
+                        onDataFailed(it.second.message)
+                    }
+                }
+                NoteFormViewModel.EDIT_OPERATION -> {
+                    if (it.second is Resource.Success) {
+                        onUpdateSuccess(it.second.data ?: 0)
+                    }
+                    else{
+                        onDataFailed(it.second.message)
+                    }
+                }
+                NoteFormViewModel.DELETE_OPERATION -> {
+                    if (it.second is Resource.Success) {
+                        onDeleteSuccess(it.second.data ?: 0)
+                    }
+                    else{
+                        onDataFailed(it.second.message)
+                    }
+                }
+            }
+        }
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -95,9 +124,9 @@ class NoteFormActivity :
     }
 
     private fun deleteNote() {
-        if(formMode == FORM_MODE_EDIT){
+        if (formMode == FORM_MODE_EDIT) {
             note?.let {
-                getPresenter().deleteNote(it)
+                getViewModel().deleteNote(it)
             }
         }
     }
@@ -113,7 +142,7 @@ class NoteFormActivity :
                     isProtected = getViewBinding().swProtectNote.isChecked
                     hexCardColor = pickedCardColor
                 }
-                note?.let { getPresenter().updateNote(it) }
+                note?.let { getViewModel().updateNote(it) }
             } else {
                 //do insert
                 note = Note(
@@ -123,7 +152,7 @@ class NoteFormActivity :
                     isProtected = getViewBinding().swProtectNote.isChecked,
                     hexCardColor = pickedCardColor
                 )
-                note?.let { getPresenter().insertNote(it) }
+                note?.let { getViewModel().insertNote(it) }
             }
         }
     }
@@ -143,7 +172,7 @@ class NoteFormActivity :
     }
 
     private fun initializeForm() {
-        getPresenter().checkPasswordAvailability()
+        getViewModel().checkPasswordAvailability()
         if (formMode == FORM_MODE_EDIT) {
             note?.let {
                 getViewBinding().etNoteTitle.setText(it.title)
@@ -167,7 +196,7 @@ class NoteFormActivity :
             .setColorShape(ColorShape.SQAURE)    // Default ColorShape.CIRCLE
             .setColorSwatch(ColorSwatch._300)    // Default ColorSwatch._500
             .setDefaultColor(pickedCardColor)        // Pass Default Color
-            .setColorListener { color, colorHex ->
+            .setColorListener { _, colorHex ->
                 // Handle Color Selection
                 pickedCardColor = colorHex
                 getViewBinding().ivColorPreview.setBackgroundColor(Color.parseColor(pickedCardColor))
@@ -197,5 +226,13 @@ class NoteFormActivity :
             }
             context?.startActivity(intent)
         }
+    }
+
+    override fun initViewModel(): NoteFormViewModel {
+        val dataSource = NotesDataSourceImpl(NotesDatabase.getInstance(this).noteDao())
+        val repository = NoteFormRepository(dataSource, UserPreference(this))
+        return GenericViewModelFactory(NoteFormViewModel(repository)).create(
+            NoteFormViewModel::class.java
+        )
     }
 }

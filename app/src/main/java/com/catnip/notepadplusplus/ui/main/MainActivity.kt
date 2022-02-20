@@ -1,12 +1,12 @@
 package com.catnip.notepadplusplus.ui.main
 
-import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.catnip.notepadplusplus.R
-import com.catnip.notepadplusplus.base.BaseActivity
+import com.catnip.notepadplusplus.base.arch.BaseActivity
+import com.catnip.notepadplusplus.base.arch.GenericViewModelFactory
 import com.catnip.notepadplusplus.data.local.preference.UserPreference
 import com.catnip.notepadplusplus.databinding.ActivityMainBinding
 import com.catnip.notepadplusplus.ui.changepassword.ChangePasswordBottomSheet
@@ -15,7 +15,7 @@ import com.catnip.notepadplusplus.ui.main.notelist.NoteListFragment
 import com.catnip.notepadplusplus.ui.noteform.NoteFormActivity
 
 class MainActivity :
-    BaseActivity<ActivityMainBinding, MainActivityContract.Presenter>(ActivityMainBinding::inflate),
+    BaseActivity<ActivityMainBinding, MainActivityViewModel>(ActivityMainBinding::inflate),
     MainActivityContract.View {
     private var allNotesFragment = NoteListFragment()
     private var archivedNotesFragment = NoteListFragment(true)
@@ -30,7 +30,7 @@ class MainActivity :
     override fun initView() {
         setupFragment()
         getViewBinding().fab.setOnClickListener {
-            NoteFormActivity.startActivity(this,NoteFormActivity.FORM_MODE_INSERT)
+            NoteFormActivity.startActivity(this, NoteFormActivity.FORM_MODE_INSERT)
         }
     }
 
@@ -74,12 +74,12 @@ class MainActivity :
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main,menu)
+        menuInflater.inflate(R.menu.menu_main, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId){
+        return when (item.itemId) {
             R.id.menu_change_password -> {
                 changePassword()
                 true
@@ -88,14 +88,14 @@ class MainActivity :
         }
     }
 
-    override fun changePassword(){
-        getPresenter().checkPasswordAvailability()
+    override fun changePassword() {
+        if (getViewModel().isPasswordExist()) {
+            showEnterPasswordDialog()
+        } else {
+            showDialogChangePassword()
+        }
     }
 
-    override fun initPresenter() {
-        val repository = MainActivityRepository(UserPreference(this))
-        setPresenter(MainActivityPresenter(this, repository))
-    }
 
     override fun showEnterPasswordDialog() {
         EnterPasswordBottomSheet { isPasswordConfirmed ->
@@ -113,5 +113,12 @@ class MainActivity :
                 .show()
 
         }.show(supportFragmentManager, null)
+    }
+
+    override fun initViewModel(): MainActivityViewModel {
+        val repository = MainActivityRepository(UserPreference(this))
+        return GenericViewModelFactory(MainActivityViewModel(repository)).create(
+            MainActivityViewModel::class.java
+        )
     }
 }

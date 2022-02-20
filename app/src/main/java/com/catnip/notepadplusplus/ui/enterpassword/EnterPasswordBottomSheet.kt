@@ -1,59 +1,55 @@
 package com.catnip.notepadplusplus.ui.enterpassword
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import com.catnip.notepadplusplus.R
+import com.catnip.notepadplusplus.base.arch.BaseBottomSheetDialogFragment
+import com.catnip.notepadplusplus.base.arch.GenericViewModelFactory
 import com.catnip.notepadplusplus.data.local.preference.UserPreference
 import com.catnip.notepadplusplus.databinding.FragmentEnterPasswordBottomSheetBinding
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class EnterPasswordBottomSheet(private val isPasswordConfirmed: (Boolean) -> Unit) :
-    BottomSheetDialogFragment() {
-    private lateinit var binding: FragmentEnterPasswordBottomSheetBinding
+    BaseBottomSheetDialogFragment<FragmentEnterPasswordBottomSheetBinding, EnterPasswordViewModel>(
+        FragmentEnterPasswordBottomSheetBinding::inflate
+    ),EnterPasswordContract.View {
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        // Inflate the layout for this fragment
-        binding = FragmentEnterPasswordBottomSheetBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun initView() {
         setClickListeners()
     }
 
-    private fun checkPassword() {
+    override fun checkPassword() {
         if (validateForm()) {
-            val password = context?.let { UserPreference(it).password }
-            val insertedPassword = binding.etPassword.text.toString().trim()
+            val password = getViewModel().getUserPassword()
+            val insertedPassword = getViewBinding().etPassword.text.toString().trim()
             isPasswordConfirmed.invoke(password == insertedPassword)
             dismiss()
         }
     }
 
-    private fun setClickListeners(){
-        binding.btnConfirmPassword.setOnClickListener { checkPassword() }
+    override  fun setClickListeners() {
+        getViewBinding().btnConfirmPassword.setOnClickListener { checkPassword() }
     }
 
-    private fun validateForm(): Boolean {
-        val password = binding.etPassword.text.toString()
+    override  fun validateForm(): Boolean {
+        val password = getViewBinding().etPassword.text.toString()
         var isFormValid = true
 
         //for checking is title empty
         if (password.isEmpty()) {
             isFormValid = false
-            binding.tilPassword.isErrorEnabled = true
-            binding.tilPassword.error = getString(R.string.error_password_empty)
+            getViewBinding().tilPassword.isErrorEnabled = true
+            getViewBinding().tilPassword.error = getString(R.string.error_password_empty)
         } else {
-            binding.tilPassword.isErrorEnabled = false
+            getViewBinding().tilPassword.isErrorEnabled = false
         }
 
         return isFormValid
+    }
+
+
+    override fun initViewModel(): EnterPasswordViewModel {
+        val repository = EnterPasswordRepository(UserPreference(requireContext()))
+        return GenericViewModelFactory(EnterPasswordViewModel(repository)).create(
+            EnterPasswordViewModel::class.java
+        )
     }
 
 

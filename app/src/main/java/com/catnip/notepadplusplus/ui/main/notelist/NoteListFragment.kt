@@ -5,8 +5,9 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.catnip.notepadplusplus.R
-import com.catnip.notepadplusplus.base.BaseFragment
 import com.catnip.notepadplusplus.base.model.Resource
+import com.catnip.notepadplusplus.base.arch.BaseFragment
+import com.catnip.notepadplusplus.base.arch.GenericViewModelFactory
 import com.catnip.notepadplusplus.data.local.room.NotesDatabase
 import com.catnip.notepadplusplus.data.local.room.datasource.NotesDataSourceImpl
 import com.catnip.notepadplusplus.data.model.Note
@@ -18,10 +19,11 @@ import com.catnip.notepadplusplus.utils.CommonFunction
 import com.catnip.notepadplusplus.utils.SpacesItemDecoration
 
 class NoteListFragment(private val isArchiveOnly: Boolean = false) :
-    BaseFragment<FragmentNoteListBinding, NoteListContract.Presenter>(FragmentNoteListBinding::inflate),
+    BaseFragment<FragmentNoteListBinding, NoteListViewModel>(FragmentNoteListBinding::inflate),
     NoteListContract.View {
 
     private lateinit var adapter: NoteListAdapter
+
 
     override fun initView() {
         initList()
@@ -29,16 +31,8 @@ class NoteListFragment(private val isArchiveOnly: Boolean = false) :
         getData()
     }
 
-    override fun initPresenter() {
-        context?.let {
-            val dataSource = NotesDataSourceImpl(NotesDatabase.getInstance(it).noteDao())
-            val repository = NoteListRepository(dataSource)
-            setPresenter(NoteListPresenter(this@NoteListFragment, repository))
-        }
-    }
-
     override fun getData() {
-        if (isArchiveOnly) getPresenter().getArchivedNotes() else getPresenter().getAllNotes()
+        if (isArchiveOnly) getViewModel().getArchivedNotes() else getViewModel().getAllNotes()
     }
 
     override fun showLoading(isLoading: Boolean) {
@@ -57,33 +51,6 @@ class NoteListFragment(private val isArchiveOnly: Boolean = false) :
         getViewBinding().layoutScenario.tvMessage.text = msg
     }
 
-    override fun onDataCallback(response: Resource<List<Note>>) {
-        when (response) {
-            is Resource.Loading -> {
-                showLoading(true)
-                showError(false, null)
-                showContent(false)
-            }
-            is Resource.Success -> {
-                showLoading(false)
-                response.data?.let {
-                    if (it.isEmpty()) {
-                        showError(true, getString(R.string.text_empty_notes))
-                        showContent(false)
-                    } else {
-                        showError(false, null)
-                        showContent(true)
-                        setListData(it)
-                    }
-                }
-            }
-            is Resource.Error -> {
-                showLoading(false)
-                showError(true, response.message)
-                showContent(false)
-            }
-        }
-    }
 
     override fun initList() {
         adapter = NoteListAdapter { note ->
@@ -121,5 +88,41 @@ class NoteListFragment(private val isArchiveOnly: Boolean = false) :
                     .show()
             }
         }.show(childFragmentManager, null)
+    }
+
+    override fun observeData() {
+        getViewModel().getNotesLiveData().observe(this) {
+            when (it) {
+                is Resource.Loading -> {
+                    showLoading(true)
+                    showError(false, null)
+                    showContent(false)
+                }
+                is Resource.Success -> {
+                    showLoading(false)
+                    it.data?.let { notes ->
+                        if (notes.isEmpty()) {
+                            showError(true, getString(R.string.text_empty_notes))
+                            showContent(false)
+                        } else {
+                            showError(false, null)
+                            showContent(true)
+                            setListData(notes)
+                        }
+                    }
+                }
+                is Resource.Error -> {
+                    showLoading(false)
+                    showError(true, it.message)
+                    showContent(false)
+                }
+            }
+        }
+    }
+
+    override fun initViewModel(): NoteListViewModel {
+        val dataSource = NotesDataSourceImpl(NotesDatabase.getInstance(requireContext()).noteDao())
+        val repository = NoteListRepository(dataSource)
+        return GenericViewModelFactory(NoteListViewModel(repository)).create(NoteListViewModel::class.java)
     }
 }

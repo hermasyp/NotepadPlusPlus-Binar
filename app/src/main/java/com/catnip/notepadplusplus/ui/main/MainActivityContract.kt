@@ -1,7 +1,8 @@
 package com.catnip.notepadplusplus.ui.main
 
 import androidx.fragment.app.Fragment
-import com.catnip.notepadplusplus.base.BaseContract
+import androidx.lifecycle.MutableLiveData
+import com.catnip.notepadplusplus.base.arch.BaseContract
 
 /**
 Written with love by Muhammad Hermas Yuda Pamungkas
@@ -16,8 +17,8 @@ interface MainActivityContract {
         fun showDialogChangePassword()
     }
 
-    interface Presenter : BaseContract.BasePresenter {
-        fun checkPasswordAvailability()
+    interface ViewModel : BaseContract.BaseViewModel {
+        fun isPasswordExist() : Boolean
     }
 
     interface Repository {
